@@ -11,20 +11,24 @@ import { genSaltSync, hashSync } from "bcryptjs";
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) { }
 
-  getHassPassword = (password: string )=>{
+  getHashPassword = (password: string )=>{
     const salt =genSaltSync(10);
     const hash =hashSync(password, salt);
     return hash;
   }
 
-  // create(createUserDto: CreateUserDto) {
-  async create(email:string, password:string, name:string) {
-    const hassPassword = this.getHassPassword(password);
+  async create(createUserDto: CreateUserDto) {
+    const hassPassword = this.getHashPassword(createUserDto.password);
+
     let user = await this.userModel.create({
-      email,password:hassPassword,name
+      email:createUserDto.email,
+      password:hassPassword,
+      name: createUserDto.name,
+      address: createUserDto.address
     })
     return user;
   }
+
 
   findAll() {
     return `This action returns all users`;
