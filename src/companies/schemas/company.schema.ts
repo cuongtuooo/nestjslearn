@@ -16,10 +16,13 @@ export class Company {
     description: string;
 
     @Prop()
-    createAt: string;
+    logo: string;
 
     @Prop()
-    updatedAt: string;
+    createAt: Date;
+
+    @Prop()
+    updatedAt: Date;
 
     @Prop()
     isDeleted: boolean;

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('companies')
@@ -17,19 +17,22 @@ export class CompaniesController {
     return this.companiesService.create(createCompanyDto, user);
   }
 
+  @Public()
   @Get()
+  @ResponseMessage("Fetch list companies with paginate")
   findAll(
-    @Query("page") currentPage: string, //const curentPage: string = req.query.page;
-    @Query("limit") limit: string,
+    @Query("current") currentPage: string, //const curentPage: string = req.query.page;
+    @Query("pageSize") limit: string,
     @Query() qs: string
 
   ) {
     return this.companiesService.findAll(+currentPage, +limit, qs); //currentPage convert từ string sang number
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.companiesService.findOne(+id);
+    return this.companiesService.findOne(id);
   }
 
   @Patch(':id')

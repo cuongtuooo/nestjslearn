@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Company, CompanyDocument } from './schemas/company.schema';
@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class CompaniesService {
@@ -28,8 +29,8 @@ export class CompaniesService {
     const { filter, sort, projection, population } = aqp(qs);
 
     // xóa page và limit ra khỏi filter
-    delete filter.page;
-    delete filter.limit;
+    delete filter.current;
+    delete filter.pageSize;
 
     // check filter
     // return {filter}
@@ -45,8 +46,7 @@ export class CompaniesService {
     const result = await this.companyModel.find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      // @ts-ignore: Unreachable code error
-      .sort(sort)
+      .sort(sort as any)
       .populate(population)
       .exec();
 
@@ -63,8 +63,14 @@ export class CompaniesService {
 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`not found company with id=${id}`)
+    }    
+    
+    return this.companyModel.findOne({
+      _id:id
+    })
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
